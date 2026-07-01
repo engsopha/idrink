@@ -2,11 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { IoMdBeer } from "react-icons/io";
 import { FiRefreshCw, FiSettings, FiInfo } from "react-icons/fi";
 import { FaHandPointer } from "react-icons/fa";
+import { GiCardRandom } from "react-icons/gi";
 
 import Board from "./components/Board";
 import Drink from "./components/Drink";
 import SpinRoulette from "./components/SpinRoulette";
 import FingerPicker from "./components/FingerPicker";
+import HigherLower from "./components/HigherLower";
 import Settings from "./components/Settings";
 import HowToPlay from "./components/HowToPlay";
 
@@ -14,6 +16,7 @@ const TABS = [
 	{ id: "board", label: "Board", Icon: IoMdBeer },
 	{ id: "roulette", label: "Spin", Icon: FiRefreshCw },
 	{ id: "picker", label: "Pick", Icon: FaHandPointer },
+	{ id: "cards", label: "Cards", Icon: GiCardRandom },
 	{ id: "info", label: "How to Play", Icon: FiInfo },
 	{ id: "settings", label: "Settings", Icon: FiSettings },
 ];
@@ -75,6 +78,7 @@ export default function App() {
 					))}
 			{activeTab === "roulette" && <SpinRoulette />}
 			{activeTab === "picker" && <FingerPicker />}
+			{activeTab === "cards" && <HigherLower />}
 			{activeTab === "info" && <HowToPlay />}
 			{activeTab === "settings" && <Settings />}
 			</div>

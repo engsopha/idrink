@@ -1,6 +1,7 @@
 import React from "react";
 import { IoMdBeer } from "react-icons/io";
 import { FiRefreshCw } from "react-icons/fi";
+import { GiCardRandom } from "react-icons/gi";
 
 const Step = ({ number, title, children }) => (
 	<div className="flex gap-4">
@@ -81,6 +82,52 @@ export default function HowToPlay() {
 				<Step number="6" title="Reset the board and repeat!">
 					Hit the reset button after each round to shuffle a new board and start
 					the next round fresh.
+				</Step>
+			</div>
+
+			{/* Cards game */}
+			<div className="bg-slate-700 rounded-2xl p-4 mb-6 flex items-center gap-3">
+				<GiCardRandom className="text-yellow-400 text-4xl shrink-0" />
+				<p className="text-slate-300 text-sm leading-relaxed">
+					<span className="text-white font-semibold">Cards — Higher or Lower:</span>{" "}
+					guess whether the next card beats the one on show. Guess wrong and you
+					drink!
+				</p>
+			</div>
+			<h3 className="text-yellow-400 font-semibold text-sm uppercase tracking-wider mb-4">
+				Cards — Higher or Lower
+			</h3>
+			<div className="space-y-6 mb-8">
+				<Step number="1" title="Find the glowing card">
+					All 52 cards are shared out into six piles on the grid. One pile's top
+					card is turned face-up with a{" "}
+					<span className="text-yellow-400 font-semibold">glowing outline</span>{" "}
+					— that's the card to beat. The other five are face-down stacks (the
+					number shows how many cards are left in each).
+				</Step>
+
+				<Step number="2" title="Tap a face-down card & call it out loud">
+					On your turn, tap any face-down card — it pops up larger but stays
+					hidden. Say <span className="text-white font-semibold">Higher</span> or{" "}
+					<span className="text-white font-semibold">Lower</span> than the glowing
+					card out loud so the whole group hears (Aces are high).
+				</Step>
+
+				<Step number="3" title="Tap again to reveal">
+					Tap the big card to flip it over and show the number to everyone.
+				</Step>
+
+				<Step number="4" title="The group decides who drinks">
+					Everyone checks the call together. Guessed{" "}
+					<span className="text-white font-semibold">wrong — you drink</span>. Same
+					rank? House rules — most groups make that a double! The phone doesn't
+					judge, you do.
+				</Step>
+
+				<Step number="5" title="The chain keeps going">
+					The card you flipped becomes the new glowing card, and the old one is
+					discarded. Piles shrink as you play — when they run out the whole deck
+					reshuffles automatically, so play never stops.
 				</Step>
 			</div>
 
