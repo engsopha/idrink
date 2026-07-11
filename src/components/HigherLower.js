@@ -10,26 +10,19 @@ const top = (pile) => (pile.length ? pile[pile.length - 1] : null);
 
 /* ---------- Card visuals ---------- */
 
-function CardFront({ card, size = "sm" }) {
-	const color = card.red ? "text-red-600" : "text-slate-900";
-	const corner = size === "lg" ? "text-2xl" : "text-sm";
-	const center = size === "lg" ? "text-7xl" : "text-4xl";
+// Card face artwork lives in public/cards as {S|H|D|C}{rank}.svg.
+const cardImage = (card) => `/cards/${card.suit[0].toUpperCase()}${card.rank}.svg`;
+
+function CardFront({ card }) {
+	// The SVG draws its own white card face with border and rounded corners —
+	// no wrapper chrome, or it shows through as a second layer.
 	return (
-		<div className="relative w-full h-full bg-white rounded-lg shadow-md border border-slate-300 overflow-hidden">
-			<div className={`absolute top-1 left-1.5 flex flex-col items-center leading-none ${color}`}>
-				<span className={`font-bold ${corner}`}>{card.rank}</span>
-				<span className={corner}>{card.symbol}</span>
-			</div>
-			<div className={`absolute inset-0 flex items-center justify-center ${color}`}>
-				<span className={center}>{card.symbol}</span>
-			</div>
-			<div
-				className={`absolute bottom-1 right-1.5 flex flex-col items-center leading-none rotate-180 ${color}`}
-			>
-				<span className={`font-bold ${corner}`}>{card.rank}</span>
-				<span className={corner}>{card.symbol}</span>
-			</div>
-		</div>
+		<img
+			src={cardImage(card)}
+			alt={`${card.rank} of ${card.suit}`}
+			className="block w-full h-full drop-shadow-md"
+			draggable={false}
+		/>
 	);
 }
 
@@ -66,7 +59,7 @@ function CardStack({ count, disabled, onClick }) {
 			type="button"
 			onClick={onClick}
 			disabled={disabled}
-			className="relative aspect-[3/4] w-full transition-transform active:scale-95 disabled:active:scale-100 focus:outline-none select-none"
+			className="relative aspect-[240/334] w-full transition-transform active:scale-95 disabled:active:scale-100 focus:outline-none select-none"
 			style={{ WebkitTapHighlightColor: "transparent" }}
 		>
 			{layers >= 3 && (
@@ -93,7 +86,7 @@ function CardStack({ count, disabled, onClick }) {
 // An empty pile slot.
 function EmptySlot() {
 	return (
-		<div className="aspect-[3/4] w-full rounded-lg border-2 border-dashed border-slate-700" />
+		<div className="aspect-[240/334] w-full rounded-lg border-2 border-dashed border-slate-700" />
 	);
 }
 
@@ -105,8 +98,10 @@ export default function HigherLower() {
 	const [selectedPile, setSelectedPile] = useState(null); // pile being revealed
 	const [revealed, setRevealed] = useState(false);
 	const cheerRef = useRef();
+	const flipTimerRef = useRef();
 
 	const startNew = () => {
+		clearTimeout(flipTimerRef.current);
 		const deck = createDeck(); // 52 shuffled
 		const next = Array.from({ length: GRID_SIZE }, () => []);
 		// Share all 52 across the 6 piles round-robin (uneven is fine: 9,9,9,9,8,8).
@@ -120,27 +115,26 @@ export default function HigherLower() {
 	useEffect(() => {
 		if (cheerRef.current) cheerRef.current.volume = 0.5;
 		startNew();
+		// Warm the browser cache so the flip never reveals a half-loaded face.
+		createDeck().forEach((card) => {
+			new Image().src = cardImage(card);
+		});
+		return () => clearTimeout(flipTimerRef.current);
 	}, []);
 
+	// One tap commits: the popup opens face-down, then flips on its own.
 	const handleSelect = (index) => {
 		if (index === referenceIndex || selectedPile !== null || !piles[index].length) return;
 		setSelectedPile(index);
 		setRevealed(false);
-	};
-
-	const cancelSelection = () => {
-		if (revealed) return; // must continue once revealed
-		setSelectedPile(null);
-	};
-
-	const handleReveal = () => {
-		if (revealed) return;
-		setRevealed(true);
-		// An exact tie (same rank as the reference) is objective — cheer for it!
-		if (top(piles[selectedPile]).value === top(piles[referenceIndex]).value && cheerRef.current) {
-			cheerRef.current.currentTime = 0;
-			cheerRef.current.play().catch(() => {});
-		}
+		flipTimerRef.current = setTimeout(() => {
+			setRevealed(true);
+			// An exact tie (same rank as the reference) is objective — cheer for it!
+			if (top(piles[index]).value === top(piles[referenceIndex]).value && cheerRef.current) {
+				cheerRef.current.currentTime = 0;
+				cheerRef.current.play().catch(() => {});
+			}
+		}, 600);
 	};
 
 	const handleContinue = () => {
@@ -183,7 +177,9 @@ export default function HigherLower() {
 
 			<h2 className="text-white text-xl font-bold mb-1">Higher or Lower</h2>
 			<p className="text-slate-400 text-sm mb-6 text-center">
-				Call your guess out loud, then flip to see if you beat the{" "}
+				Call <span className="text-white font-semibold">Higher</span> or{" "}
+				<span className="text-white font-semibold">Lower</span> out loud, then tap a
+				pile to see if you beat the{" "}
 				<span className="text-yellow-400 font-semibold">glowing</span> card.
 			</p>
 
@@ -192,7 +188,7 @@ export default function HigherLower() {
 				{piles.map((pile, i) => {
 					if (i === referenceIndex) {
 						return (
-							<div key={i} className="relative aspect-[3/4] w-full">
+							<div key={i} className="relative aspect-[240/334] w-full">
 								<div className="absolute inset-0 rounded-lg ring-2 ring-yellow-400 ring-offset-2 ring-offset-slate-800">
 									<CardFront card={reference} />
 								</div>
@@ -217,14 +213,8 @@ export default function HigherLower() {
 
 			{/* Enlarged card popup */}
 			{selectedPile !== null && (
-				<div
-					className="fixed inset-0 z-50 bg-black/75 flex flex-col items-center justify-center p-6"
-					onClick={cancelSelection}
-				>
-					<div
-						className="flex flex-col items-center gap-6"
-						onClick={(e) => e.stopPropagation()}
-					>
+				<div className="fixed inset-0 z-50 bg-black/75 flex flex-col items-center justify-center p-6">
+					<div className="flex flex-col items-center gap-6">
 						<p className="text-slate-300 text-sm text-center">
 							Beat the{" "}
 							<span className={`font-bold ${reference.red ? "text-red-500" : "text-white"}`}>
@@ -233,12 +223,10 @@ export default function HigherLower() {
 							</span>
 						</p>
 
-						{/* Big flip card — tap to reveal */}
-						<button
-							type="button"
-							onClick={handleReveal}
-							className="w-52 aspect-[3/4] active:scale-[0.98] transition-transform focus:outline-none select-none"
-							style={{ perspective: 1000, WebkitTapHighlightColor: "transparent" }}
+						{/* Big flip card — reveals on its own */}
+						<div
+							className="w-52 aspect-[240/334] select-none"
+							style={{ perspective: 1000 }}
 						>
 							<div
 								className="relative w-full h-full"
@@ -255,22 +243,20 @@ export default function HigherLower() {
 									className="absolute inset-0"
 									style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
 								>
-									<CardFront card={top(piles[selectedPile])} size="lg" />
+									<CardFront card={top(piles[selectedPile])} />
 								</div>
 							</div>
-						</button>
+						</div>
 
 						{!revealed ? (
 							<p className="text-slate-400 text-sm text-center animate-pulse w-64">
-								Say <span className="text-white font-semibold">Higher</span> or{" "}
-								<span className="text-white font-semibold">Lower</span> out loud, then
-								tap the card to flip it.
+								No take-backs&hellip; flipping!
 							</p>
 						) : (
 							<div className="text-center w-64">
 								{top(piles[selectedPile]).value === reference.value ? (
 									<p className="text-amber-400 text-lg font-bold mb-5">
-										It's a tie! 🎉 Everyone drinks!
+										It's a tie! 🎉 Drink double!
 									</p>
 								) : (
 									<p className="text-slate-300 text-sm mb-5">

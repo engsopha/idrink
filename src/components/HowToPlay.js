@@ -106,15 +106,15 @@ export default function HowToPlay() {
 					number shows how many cards are left in each).
 				</Step>
 
-				<Step number="2" title="Tap a face-down card & call it out loud">
-					On your turn, tap any face-down card — it pops up larger but stays
-					hidden. Say <span className="text-white font-semibold">Higher</span> or{" "}
-					<span className="text-white font-semibold">Lower</span> than the glowing
+				<Step number="2" title="Call it out loud">
+					On your turn, say <span className="text-white font-semibold">Higher</span>{" "}
+					or <span className="text-white font-semibold">Lower</span> than the glowing
 					card out loud so the whole group hears (Aces are high).
 				</Step>
 
-				<Step number="3" title="Tap again to reveal">
-					Tap the big card to flip it over and show the number to everyone.
+				<Step number="3" title="Tap a face-down card to reveal">
+					Tap any face-down card — it pops up larger and flips over on its own to
+					show the number to everyone. No take-backs!
 				</Step>
 
 				<Step number="4" title="The group decides who drinks">
